@@ -1,0 +1,15 @@
+rg_name = "my-psql-flex-rg"
+
+psql_version = "16"
+
+psql_name      = "my-psql-flex-server"
+admin_username = "psql_admin"
+admin_password = "pa55w0rd"
+
+enable_initialization = true
+
+db_name = "my_db"
+
+storage_mb = 32768
+
+allowed_extensions = "UUID-OSSP,POSTGIS,POSTGIS_RASTER,POSTGIS_TOPOLOGY,FUZZYSTRMATCH,ADDRESS_STANDARDIZER,PG_TRGM"
