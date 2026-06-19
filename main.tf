@@ -10,8 +10,9 @@ resource "azurerm_resource_group" "db_rg" {
 #---------------------------------------------
 # Azure PostgreSQL Flex
 #---------------------------------------------
+# using PostgreSQL Flexible server name as the AKV/secrets' prefix
 resource "azurerm_key_vault" "kv" {
-  name                     = "my-psql-kv"
+  name                     = "${var.psql_name}-akv"
   resource_group_name      = azurerm_resource_group.db_rg.name
   location                 = var.location
   tenant_id                = data.azurerm_client_config.current.tenant_id
@@ -27,15 +28,23 @@ resource "azurerm_key_vault" "kv" {
 }
 
 resource "azurerm_key_vault_secret" "db_username" {
-  name         = "psql-admin-username"
+  name         = "${var.psql_name}-admin-username"
   value        = var.admin_username
   key_vault_id = azurerm_key_vault.kv.id
+
+  depends_on = [
+    azurerm_key_vault.kv
+  ]
 }
 
 resource "azurerm_key_vault_secret" "db_password" {
-  name         = "psql-admin-password"
+  name         = "${var.psql_name}-admin-password"
   value        = var.admin_password
   key_vault_id = azurerm_key_vault.kv.id
+
+  depends_on = [
+    azurerm_key_vault.kv
+  ]
 }
 
 
@@ -43,7 +52,7 @@ resource "azurerm_key_vault_secret" "db_password" {
 # Azure PostgreSQL Flex
 #---------------------------------------------
 data "azurerm_key_vault_secret" "db_username" {
-  name         = "psql-admin-username"
+  name         = "${var.psql_name}-admin-username"
   key_vault_id = azurerm_key_vault.kv.id
 
   depends_on = [
@@ -52,7 +61,7 @@ data "azurerm_key_vault_secret" "db_username" {
 }
 
 data "azurerm_key_vault_secret" "db_password" {
-  name         = "psql-admin-password"
+  name         = "${var.psql_name}-admin-password"
   key_vault_id = azurerm_key_vault.kv.id
 
   depends_on = [

@@ -22,6 +22,14 @@ provider "azurerm" {
     resource_group {
       prevent_deletion_if_contains_resources = false
     }
+
+    postgresql_flexible_server {
+      restart_server_on_configuration_value_change = true
+    }
+
+    virtual_machine {
+      delete_os_disk_on_deletion = true
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+# NOTE: templated script can be found in /var/lib/cloud/instance/ on VM
 set -e
 exec > /var/log/cloud-init-output.log 2>&1
 
@@ -12,24 +13,33 @@ apt-get install -y postgresql-client
 # install azure-cli
 curl -fsSL 'https://azurecliprod.blob.core.windows.net/$root/deb_install.sh' | sudo bash
 
-# Wait for managed identity to be available
-echo "Waiting for managed identity..."
-sleep 10
 # login using managed identity
 az login --identity --allow-no-subscriptions
+# Wait for managed identity to be available
+echo "Giving time for managed identity permissions to propagate..."
+for i in {1..30}; do
+  if az keyvault secret show \
+       --vault-name ${akv_name} \
+       --name "${akv_secret_db_username}" \
+       --query value -o tsv > /dev/null 2>&1; then
+    echo "Key Vault access confirmed"
+    break
+  fi
+  echo "Attempt $i: Key Vault access not yet propagated, retrying in 10s..."
+  sleep 10
+done
 
 # Fetch secrets from Key Vault
-export DB_PASSWORD=$(az keyvault secret show \
-  --vault-name my-psql-kv \
-  --name psql-admin-password \
-  --query value -o tsv)
-
 export DB_USER=$(az keyvault secret show \
-  --vault-name my-psql-kv \
-  --name psql-admin-username \
+  --vault-name ${akv_name} \
+  --name ${akv_secret_db_username} \
   --query value -o tsv)
 
-sleep 2
+export DB_PASSWORD=$(az keyvault secret show \
+  --vault-name ${akv_name} \
+  --name ${akv_secret_db_password} \
+  --query value -o tsv)
+
 
 echo "Waiting for PostgreSQL to be ready..."
 for i in {1..10}; do
@@ -43,30 +53,14 @@ for i in {1..10}; do
   sleep 10
 done
 
-
+# creates a separate connection + create extension command
+# for every ext in allowed_extensions
+%{ for ext in allowed_extensions ~}
 PGPASSWORD="$${DB_PASSWORD}" psql \
   "host=${db_host} port=5432 dbname=${db_name} user=$${DB_USER} sslmode=require" \
-  -c "CREATE EXTENSION IF NOT EXISTS postgis CASCADE;"
+  -c "CREATE EXTENSION IF NOT EXISTS \"${ext}\" CASCADE;"
 
-PGPASSWORD="$${DB_PASSWORD}" psql \
-  "host=${db_host} port=5432 dbname=${db_name} user=$${DB_USER} sslmode=require" \
-  -c "CREATE EXTENSION IF NOT EXISTS postgis_raster CASCADE;"
-
-PGPASSWORD="$${DB_PASSWORD}" psql \
-  "host=${db_host} port=5432 dbname=${db_name} user=$${DB_USER} sslmode=require" \
-  -c "CREATE EXTENSION IF NOT EXISTS postgis_topology CASCADE;"
-
-PGPASSWORD="$${DB_PASSWORD}" psql \
-  "host=${db_host} port=5432 dbname=${db_name} user=$${DB_USER} sslmode=require" \
-  -c "CREATE EXTENSION IF NOT EXISTS fuzzystrmatch CASCADE;"
-
-PGPASSWORD="$${DB_PASSWORD}" psql \
-  "host=${db_host} port=5432 dbname=${db_name} user=$${DB_USER} sslmode=require" \
-  -c "CREATE EXTENSION IF NOT EXISTS address_standardizer CASCADE;"
-
-PGPASSWORD="$${DB_PASSWORD}" psql \
-  "host=${db_host} port=5432 dbname=${db_name} user=$${DB_USER} sslmode=require" \
-  -c "CREATE EXTENSION IF NOT EXISTS pg_trgm CASCADE;"
+%{ endfor ~}
 
 # Signal success
 touch /tmp/psql_init_done

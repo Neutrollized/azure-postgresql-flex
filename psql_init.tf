@@ -1,3 +1,8 @@
+# splits quoted string list of extensions in uppercase into actual list of lowercase
+# i.e. "POSTGIS, POSTGIS_RASTER" -> ["postgis", "postgis_raster"]
+locals {
+  allowed_extensions_list = [for ext in split(",", var.allowed_extensions) : trimspace(lower(ext))]
+}
 
 resource "azurerm_linux_virtual_machine" "psql_init" {
   count               = var.enable_initialization ? 1 : 0
@@ -31,8 +36,12 @@ resource "azurerm_linux_virtual_machine" "psql_init" {
   }
 
   custom_data = base64encode(templatefile("${path.module}/scripts/psql_init.sh", {
-    db_host = azurerm_postgresql_flexible_server.psql.fqdn
-    db_name = azurerm_postgresql_flexible_server_database.gis_db.name
+    db_host                = azurerm_postgresql_flexible_server.psql.fqdn
+    db_name                = azurerm_postgresql_flexible_server_database.gis_db.name
+    akv_name               = azurerm_key_vault.kv.name
+    akv_secret_db_username = azurerm_key_vault_secret.db_username.name
+    akv_secret_db_password = azurerm_key_vault_secret.db_password.name
+    allowed_extensions     = local.allowed_extensions_list
   }))
 
   depends_on = [
@@ -63,7 +72,7 @@ resource "azurerm_key_vault_access_policy" "vm_identity" {
   secret_permissions = ["Get", "List"]
 }
 
-# cleanup
+# cleanup psql init vm
 resource "null_resource" "destroy_init_vm" {
   count = var.enable_initialization ? 1 : 0
 
@@ -72,7 +81,7 @@ resource "null_resource" "destroy_init_vm" {
   }
 
   provisioner "local-exec" {
-    command = "sleep 120 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name psql-init-vm --force-deletion true"
+    command = "sleep 360 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name psql-init-vm"
   }
 
   depends_on = [azurerm_linux_virtual_machine.psql_init]
