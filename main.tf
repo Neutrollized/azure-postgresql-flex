@@ -87,16 +87,14 @@ resource "azurerm_private_dns_zone_virtual_network_link" "psql" {
 }
 
 resource "azurerm_postgresql_flexible_server" "psql" {
-  name                   = var.psql_name
-  resource_group_name    = azurerm_resource_group.db_rg.name
-  location               = var.location
-  version                = var.psql_version
-  delegated_subnet_id    = azurerm_subnet.db.id
-  private_dns_zone_id    = azurerm_private_dns_zone.psql.id
-  administrator_login    = data.azurerm_key_vault_secret.db_username.value
-  administrator_password = data.azurerm_key_vault_secret.db_password.value
-  #  administrator_login           = var.admin_username
-  #administrator_password        = var.admin_password
+  name                          = var.psql_name
+  resource_group_name           = azurerm_resource_group.db_rg.name
+  location                      = var.location
+  version                       = var.psql_version
+  delegated_subnet_id           = azurerm_subnet.db.id
+  private_dns_zone_id           = azurerm_private_dns_zone.psql.id
+  administrator_login           = data.azurerm_key_vault_secret.db_username.value
+  administrator_password        = data.azurerm_key_vault_secret.db_password.value
   public_network_access_enabled = false
   zone                          = 1
 

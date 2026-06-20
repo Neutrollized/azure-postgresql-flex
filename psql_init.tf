@@ -80,9 +80,40 @@ resource "null_resource" "destroy_init_vm" {
     always_run = timestamp()
   }
 
+  # simple, static sleep timer
+  #provisioner "local-exec" {
+  #  command = "sleep 360 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name psql-init-vm"
+  #}
+
   provisioner "local-exec" {
-    command = "sleep 360 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name psql-init-vm"
+    command = <<-EOT
+      set -e
+      for i in $(seq 1 30); do
+        STATUS=$(az vm run-command invoke \
+          --resource-group ${azurerm_resource_group.db_rg.name} \
+          --name psql-init-vm \
+          --command-id RunShellScript \
+          --scripts "test -f /tmp/psql_init_done && echo DONE || echo PENDING" \
+          --query "value[0].message" -o tsv 2>/dev/null | grep -o 'DONE\|PENDING' || echo PENDING)
+
+        if [ "$STATUS" = "DONE" ]; then
+          echo "Init complete, deleting VM"
+          az vm delete --yes \
+            --resource-group ${azurerm_resource_group.db_rg.name} \
+            --name psql-init-vm
+          exit 0
+        fi
+
+        echo "Attempt $i: init not complete yet, retrying in 20s..."
+        sleep 20
+      done
+
+      echo "Timed out waiting for init to complete"
+      exit 1
+    EOT
   }
 
-  depends_on = [azurerm_linux_virtual_machine.psql_init]
+  depends_on = [
+    azurerm_linux_virtual_machine.psql_init
+  ]
 }
