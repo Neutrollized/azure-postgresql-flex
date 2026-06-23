@@ -9,6 +9,6 @@ output "_connect_to_postgres_flex_string" {
 }
 
 # for troubleshooting cloud-init
-#output "_init_connection_string" {
-#  value = "az network bastion ssh --name ${azurerm_bastion_host.bastion.name} --resource-group ${azurerm_resource_group.db_rg.name} --target-resource-id ${azurerm_linux_virtual_machine.psql_init[0].id} --auth-type ssh-key --username azureuser --ssh-key ~/.ssh/id_rsa"
-#}
+output "_init_connection_string" {
+  value = "az network bastion ssh --name ${azurerm_bastion_host.bastion.name} --resource-group ${azurerm_resource_group.db_rg.name} --target-resource-id ${azurerm_linux_virtual_machine.psql_init[0].id} --auth-type ssh-key --username azureuser --ssh-key ~/.ssh/id_rsa"
+}

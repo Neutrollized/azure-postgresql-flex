@@ -96,12 +96,19 @@ resource "azurerm_postgresql_flexible_server" "psql" {
   administrator_login           = data.azurerm_key_vault_secret.db_username.value
   administrator_password        = data.azurerm_key_vault_secret.db_password.value
   public_network_access_enabled = false
-  zone                          = 1
+  zone                          = var.zone
 
   storage_mb   = var.storage_mb
   storage_tier = var.storage_tier # https://azure.microsoft.com/en-us/pricing/details/managed-disks/
 
   sku_name = var.sku_name
+
+  lifecycle {
+    ignore_changes = [
+      zone,
+      high_availability[0].standby_availability_zone
+    ]
+  }
 
   depends_on = [
     azurerm_private_dns_zone_virtual_network_link.psql

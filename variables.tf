@@ -55,6 +55,12 @@ variable "psql_name" {
   type        = string
 }
 
+variable "zone" {
+  description = "PostgreSQL server zone."
+  type        = string
+  default     = null
+}
+
 variable "admin_username" {
   description = "PostgreSQL admin username (cannot be 'root' or 'admin')"
   type        = string

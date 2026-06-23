@@ -9,6 +9,14 @@ Core resources used:
 - Azure Key Vault
 
 
+# Prerequisites
+You will need the Azure CLI and the following [extensions](https://learn.microsoft.com/en-us/cli/azure/azure-cli-extensions-list?view=azure-cli-latest):
+```sh
+az extension add --name bastion
+az extension add --name ssh
+```
+
+
 ## Installing PostgreSQL Extensions
 If you have a public endpoint, you can probably allowlist your IP and use a `null_resource` to connect to your PostgreSQL server to execute the necessary `psql` commands. You might even leverage the [PostgreSQL provider](https://registry.terraform.io/providers/cyrilgdn/postgresql/latest/docs) to do so. However, we have a secure, private server and I don't have an Azure DevOps runner (or something equivalent) and just want to be able to set this up all from my Macbook!
 

@@ -6,7 +6,7 @@ locals {
 
 resource "azurerm_linux_virtual_machine" "psql_init" {
   count               = var.enable_initialization ? 1 : 0
-  name                = "psql-init-vm"
+  name                = "${var.psql_name}-init-vm"
   resource_group_name = azurerm_resource_group.db_rg.name
   location            = var.location
   size                = "Standard_B1s" # cheapest, fine for a jump box
@@ -52,7 +52,7 @@ resource "azurerm_linux_virtual_machine" "psql_init" {
 
 resource "azurerm_network_interface" "psql_init" {
   count               = var.enable_initialization ? 1 : 0
-  name                = "init-nic"
+  name                = "${var.psql_name}-init-nic"
   resource_group_name = azurerm_resource_group.db_rg.name
   location            = var.location
 
@@ -82,16 +82,16 @@ resource "null_resource" "destroy_init_vm" {
 
   # simple, static sleep timer
   #provisioner "local-exec" {
-  #  command = "sleep 360 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name psql-init-vm"
+  #  command = "sleep 720 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name psql-init-vm"
   #}
 
   provisioner "local-exec" {
     command = <<-EOT
       set -e
-      for i in $(seq 1 30); do
+      for i in $(seq 1 24); do
         STATUS=$(az vm run-command invoke \
           --resource-group ${azurerm_resource_group.db_rg.name} \
-          --name psql-init-vm \
+          --name ${var.psql_name}-init-vm \
           --command-id RunShellScript \
           --scripts "test -f /tmp/psql_init_done && echo DONE || echo PENDING" \
           --query "value[0].message" -o tsv 2>/dev/null | grep -o 'DONE\|PENDING' || echo PENDING)
@@ -100,12 +100,12 @@ resource "null_resource" "destroy_init_vm" {
           echo "Init complete, deleting VM"
           az vm delete --yes \
             --resource-group ${azurerm_resource_group.db_rg.name} \
-            --name psql-init-vm
+            --name ${var.psql_name}-init-vm
           exit 0
         fi
 
-        echo "Attempt $i: init not complete yet, retrying in 20s..."
-        sleep 20
+        echo "Attempt $i: init not complete yet, retrying in 30s..."
+        sleep 30
       done
 
       echo "Timed out waiting for init to complete"
