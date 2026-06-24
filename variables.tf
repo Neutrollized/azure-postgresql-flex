@@ -23,19 +23,19 @@ variable "vnet_cidrs" {
 }
 
 variable "bastion_subnet_cidrs" {
-  description = "Subnet CIDR for System Node Pool"
+  description = "Subnet CIDR for Bastion"
   type        = list(string)
   default     = ["10.0.1.0/26"]
 }
 
 variable "app_subnet_cidrs" {
-  description = "Subnet CIDR for System Node Pool"
+  description = "Subnet CIDR for app"
   type        = list(string)
   default     = ["10.0.2.0/24"]
 }
 
 variable "db_subnet_cidrs" {
-  description = "Subnet CIDR for System Node Pool"
+  description = "Subnet CIDR for database"
   type        = list(string)
   default     = ["10.0.3.0/24"]
 }
@@ -92,6 +92,11 @@ variable "storage_mb" {
   description = "DB storage size in MB."
   type        = number
   default     = 32768
+
+  validation {
+    condition     = contains([32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4193280, 4194304, 8388608, 16777216, 33553408], var.storage_mb)
+    error_message = "Accepted values are 32768, 65536, 131072, 262144, 524288, 1048576, 2097152, 4193280, 4194304, 8388608, 16777216, or 33553408"
+  }
 }
 
 variable "storage_tier" {
