@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Added variable, `zone` (default: `null`), to replace hardcoded `zone` in `postgresql_flexible_server` config
 - Added `lifecycles` rules for `zone` and `high_availability` standby zone changes that can show up in subsequent Terraform applies to be ignored
 - The PostgreSQL Flexible server's name is incorporated into the init VM's name
+- Variable, `enable_initialization` changed to `true` by default
 
 ## [0.3.0] - 2026-06-20
 ### Changed

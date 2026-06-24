@@ -47,7 +47,7 @@ variable "db_subnet_cidrs" {
 variable "enable_initialization" {
   description = "When true, deploy VM to perform initialization and PostgreSQL extension installs."
   type        = bool
-  default     = false
+  default     = true
 }
 
 variable "psql_name" {
