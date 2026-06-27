@@ -1,4 +1,4 @@
-# splits quoted string list of extensions in uppercase into actual list of lowercase
+# splits comma-delimited string list of extensions in uppercase into an actual list in lowercase
 # i.e. "POSTGIS, POSTGIS_RASTER" -> ["postgis", "postgis_raster"]
 locals {
   allowed_extensions_list = [for ext in split(",", var.allowed_extensions) : trimspace(lower(ext))]
@@ -82,7 +82,7 @@ resource "null_resource" "destroy_init_vm" {
 
   # simple, static sleep timer
   #provisioner "local-exec" {
-  #  command = "sleep 720 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name psql-init-vm"
+  #  command = "sleep 720 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name ${var.psql_name}-init-vm"
   #}
 
   provisioner "local-exec" {

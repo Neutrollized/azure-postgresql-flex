@@ -4,7 +4,6 @@ psql_version = "16"
 
 psql_name      = "my-psql-flex-server"
 admin_username = "psql_admin"
-admin_password = "pa55w0rd"
 
 enable_initialization = true
 

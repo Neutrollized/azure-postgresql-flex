@@ -67,11 +67,11 @@ variable "admin_username" {
   sensitive   = true
 }
 
-variable "admin_password" {
-  description = "PostgreSQL admin password."
-  type        = string
-  sensitive   = true
-}
+#variable "admin_password" {
+#  description = "PostgreSQL admin password."
+#  type        = string
+#  sensitive   = true
+#}
 
 variable "psql_version" {
   description = "PostgreSQL version."
@@ -99,21 +99,27 @@ variable "storage_mb" {
   }
 }
 
-variable "storage_tier" {
-  description = "DB storage tier."
-  type        = string
-  default     = "P4"
-
-  validation {
-    condition     = contains(["P4", "P6", "P10", "P15", "P20", "P30", "P40", "P50", "P60", "P70", "P80"], var.storage_tier)
-    error_message = "Accepted values are P4, P6, P10, P15, P20, P30, P40, P50, P60, P70, or P80"
-  }
+variable "auto_grow_enabled" {
+  description = "When true, enable storage autogrow feature."
+  type        = bool
+  default     = false
 }
 
+#variable "storage_tier" {
+#  description = "DB storage tier."
+#  type        = string
+#  default     = "P4"
+#
+#  validation {
+#    condition     = contains(["P4", "P6", "P10", "P15", "P20", "P30", "P40", "P50", "P60", "P70", "P80"], var.storage_tier)
+#    error_message = "Accepted values are P4, P6, P10, P15, P20, P30, P40, P50, P60, P70, or P80"
+#  }
+#}
+
 variable "sku_name" {
-  description = "PostgreSQL server SKU."
+  description = "PostgreSQL server SKU. Follows the 'tier' + 'name' pattern."
   type        = string
-  default     = "GP_Standard_D2s_v3"
+  default     = "B_Standard_B1ms"
 }
 
 variable "allowed_extensions" {

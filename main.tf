@@ -6,6 +6,12 @@ resource "azurerm_resource_group" "db_rg" {
   location = var.location
 }
 
+resource "random_password" "db_password" {
+  length           = 16
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 
 #---------------------------------------------
 # Azure PostgreSQL Flex
@@ -39,7 +45,7 @@ resource "azurerm_key_vault_secret" "db_username" {
 
 resource "azurerm_key_vault_secret" "db_password" {
   name         = "${var.psql_name}-admin-password"
-  value        = var.admin_password
+  value        = random_password.db_password.result
   key_vault_id = azurerm_key_vault.kv.id
 
   depends_on = [
@@ -90,18 +96,17 @@ resource "azurerm_postgresql_flexible_server" "psql" {
   name                          = var.psql_name
   resource_group_name           = azurerm_resource_group.db_rg.name
   location                      = var.location
-  version                       = var.psql_version
   delegated_subnet_id           = azurerm_subnet.db.id
   private_dns_zone_id           = azurerm_private_dns_zone.psql.id
   administrator_login           = data.azurerm_key_vault_secret.db_username.value
-  administrator_password        = data.azurerm_key_vault_secret.db_password.value
+  administrator_password        = random_password.db_password.result
   public_network_access_enabled = false
   zone                          = var.zone
 
-  storage_mb   = var.storage_mb
-  storage_tier = var.storage_tier # https://azure.microsoft.com/en-us/pricing/details/managed-disks/
-
-  sku_name = var.sku_name
+  version           = var.psql_version
+  sku_name          = var.sku_name
+  storage_mb        = var.storage_mb
+  auto_grow_enabled = var.auto_grow_enabled
 
   lifecycle {
     ignore_changes = [
@@ -120,6 +125,11 @@ resource "azurerm_postgresql_flexible_server_database" "gis_db" {
   server_id = azurerm_postgresql_flexible_server.psql.id
   collation = "en_US.utf8"
   charset   = "utf8"
+
+  # enable this to prevent accidental data loss
+  #lifecycle {
+  #  prevent_destroy = true
+  #}
 }
 
 # allowlist extensions that can be installed
