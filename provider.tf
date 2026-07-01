@@ -41,3 +41,5 @@ provider "azurerm" {
 provider "azuread" {}
 
 provider "null" {}
+
+provider "random" {}

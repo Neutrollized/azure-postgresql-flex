@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [0.4.1] - 2026-07-01 - Happy birthday, Canada!
+### Added
+- Added variables, `collation` (default: `en_US.utf8`), and `charset` (default: `utf8`) used for setting up database
+
 ## [0.4.0] - 2026-06-27
 ### Added
 - `hashicorp/random` provider to generate the admin password instead

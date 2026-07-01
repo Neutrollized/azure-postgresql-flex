@@ -83,11 +83,6 @@ variable "psql_version" {
   }
 }
 
-variable "db_name" {
-  description = "PostgreSQL database name."
-  type        = string
-}
-
 variable "storage_mb" {
   description = "DB storage size in MB."
   type        = number
@@ -126,4 +121,25 @@ variable "allowed_extensions" {
   description = "Extensions allowlist (comma delimited)."
   type        = string
   default     = "UUID-OSSP"
+}
+
+
+###------------------------
+# PostgreSQL Database
+#--------------------------
+variable "db_name" {
+  description = "PostgreSQL database name."
+  type        = string
+}
+
+variable "collation" {
+  description = "Specifies the Collation for the database"
+  type        = string
+  default     = "en_US.utf8"
+}
+
+variable "charset" {
+  description = "Specifies the Charset for the database"
+  type        = string
+  default     = "utf8"
 }

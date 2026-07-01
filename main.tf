@@ -14,7 +14,7 @@ resource "random_password" "db_password" {
 
 
 #---------------------------------------------
-# Azure PostgreSQL Flex
+# Azure Key Vault
 #---------------------------------------------
 # using PostgreSQL Flexible server name as the AKV/secrets' prefix
 resource "azurerm_key_vault" "kv" {
@@ -123,8 +123,8 @@ resource "azurerm_postgresql_flexible_server" "psql" {
 resource "azurerm_postgresql_flexible_server_database" "gis_db" {
   name      = var.db_name
   server_id = azurerm_postgresql_flexible_server.psql.id
-  collation = "en_US.utf8"
-  charset   = "utf8"
+  collation = var.collation
+  charset   = var.charset
 
   # enable this to prevent accidental data loss
   #lifecycle {
