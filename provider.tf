@@ -39,7 +39,3 @@ provider "azurerm" {
 
 # https://registry.terraform.io/providers/hashicorp/azuread/latest/docs
 provider "azuread" {}
-
-provider "null" {}
-
-provider "random" {}

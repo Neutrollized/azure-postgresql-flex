@@ -27,6 +27,8 @@ resource "azurerm_subnet" "app" {
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = var.app_subnet_cidrs
 
+  service_endpoints = ["Microsoft.KeyVault"]
+
   depends_on = [
     azurerm_virtual_network.vnet
   ]

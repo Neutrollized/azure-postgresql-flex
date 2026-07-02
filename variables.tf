@@ -42,6 +42,16 @@ variable "db_subnet_cidrs" {
 
 
 ###------------------------
+# Azure Key Vault
+#--------------------------
+variable "network_acls_ip_rules" {
+  description = "List of IPs allowed bypass the network ACLs. Add yours if you're running Terraform from a local machine"
+  type        = list(string)
+  default     = []
+}
+
+
+###------------------------
 # PostgreSQL Flexible
 #--------------------------
 variable "enable_initialization" {
@@ -115,6 +125,28 @@ variable "sku_name" {
   description = "PostgreSQL server SKU. Follows the 'tier' + 'name' pattern."
   type        = string
   default     = "B_Standard_B1ms"
+}
+
+variable "pgbouncer_enabled" {
+  description = "Value of the pgboucner.enable config"
+  type        = bool
+  default     = false
+}
+
+variable "pgbouncer_settings" {
+  description = "Map of PgBouncer settings."
+  type        = map(string)
+  default = {
+    "pgbouncer.default_pool_size" = "50"
+    "pgbouncer.max_client_conn"   = "5000"
+    "pgbouncer.min_pool_size"     = "0"
+  }
+}
+
+variable "pgbouncer_pool_size" {
+  description = "Value of the pgboucner pool size"
+  type        = number
+  default     = 10
 }
 
 variable "allowed_extensions" {

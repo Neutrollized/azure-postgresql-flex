@@ -82,13 +82,13 @@ resource "null_resource" "destroy_init_vm" {
 
   # simple, static sleep timer
   #provisioner "local-exec" {
-  #  command = "sleep 720 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name ${var.psql_name}-init-vm"
+  #  command = "sleep 480 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name ${var.psql_name}-init-vm"
   #}
 
   provisioner "local-exec" {
     command = <<-EOT
       set -e
-      for i in $(seq 1 24); do
+      for i in $(seq 1 16); do
         STATUS=$(az vm run-command invoke \
           --resource-group ${azurerm_resource_group.db_rg.name} \
           --name ${var.psql_name}-init-vm \

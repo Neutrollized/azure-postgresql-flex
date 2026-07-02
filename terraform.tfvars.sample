@@ -1,5 +1,7 @@
 rg_name = "my-psql-flex-rg"
 
+network_acls_ip_rules = ["123.45.67.89/32"]
+
 psql_version = "16"
 
 psql_name      = "my-psql-flex-server"

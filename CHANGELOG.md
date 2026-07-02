@@ -5,6 +5,15 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [0.5.0] - 2026-07-02
+### Added
+- Added `network_acl` configuration for Azure Key Vault for additional security
+- Added variable, `network_acls_ip_rules` (default: `[]`) to allow-list IPs for anyone running Terraform apply from local machine
+- Added variables, `pgbouncer_enabled` (default: `false`) and `pgbouncer_setting` for enabling and configuring [PgBouncer on PostgreSQL Flexible](https://learn.microsoft.com/en-us/azure/postgresql/connectivity/concepts-pgbouncer)
+- Added `tags` to PostgreSQL Flexible server's lifecycle `ignore_changes` list
+### Removed
+- Provider blocks for `random` and `null` as they have no configurable arguments
+
 ## [0.4.1] - 2026-07-01 - Happy birthday, Canada!
 ### Added
 - Added variables, `collation` (default: `en_US.utf8`), and `charset` (default: `utf8`) used for setting up database

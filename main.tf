@@ -31,6 +31,13 @@ resource "azurerm_key_vault" "kv" {
 
     secret_permissions = ["Get", "Set", "Delete", "List", "Purge"]
   }
+
+  network_acls {
+    bypass                     = "AzureServices"
+    default_action             = "Deny"
+    ip_rules                   = var.network_acls_ip_rules
+    virtual_network_subnet_ids = [azurerm_subnet.app.id]
+  }
 }
 
 resource "azurerm_key_vault_secret" "db_username" {
@@ -77,7 +84,7 @@ data "azurerm_key_vault_secret" "db_password" {
 
 
 resource "azurerm_private_dns_zone" "psql" {
-  name                = "private.postgres.database.azure.com"
+  name                = "privatelink.postgres.database.azure.com"
   resource_group_name = azurerm_resource_group.db_rg.name
 }
 
@@ -110,6 +117,7 @@ resource "azurerm_postgresql_flexible_server" "psql" {
 
   lifecycle {
     ignore_changes = [
+      tags,
       zone,
       high_availability[0].standby_availability_zone
     ]
@@ -130,6 +138,26 @@ resource "azurerm_postgresql_flexible_server_database" "gis_db" {
   #lifecycle {
   #  prevent_destroy = true
   #}
+}
+
+# PgBouncer requires a non-burstable machine type, so I want to exclude this entire resource
+# and not just set it to "false" (because it will still complain)
+resource "azurerm_postgresql_flexible_server_configuration" "enable_pgbouncer" {
+  count     = var.pgbouncer_enabled ? 1 : 0
+  name      = "pgbouncer.enabled"
+  server_id = azurerm_postgresql_flexible_server.psql.id
+  value     = "true"
+}
+
+resource "azurerm_postgresql_flexible_server_configuration" "pgbouncer_settings" {
+  for_each  = var.pgbouncer_enabled ? var.pgbouncer_settings : {}
+  name      = each.key
+  server_id = azurerm_postgresql_flexible_server.psql.id
+  value     = each.value
+
+  depends_on = [
+    azurerm_postgresql_flexible_server_configuration.enable_pgbouncer
+  ]
 }
 
 # allowlist extensions that can be installed
