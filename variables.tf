@@ -143,12 +143,6 @@ variable "pgbouncer_settings" {
   }
 }
 
-variable "pgbouncer_pool_size" {
-  description = "Value of the pgboucner pool size"
-  type        = number
-  default     = 10
-}
-
 variable "allowed_extensions" {
   description = "Extensions allowlist (comma delimited)."
   type        = string
