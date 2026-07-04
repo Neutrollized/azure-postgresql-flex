@@ -28,6 +28,12 @@ variable "bastion_subnet_cidrs" {
   default     = ["10.0.1.0/26"]
 }
 
+variable "pe_subnet_cidrs" {
+  description = "Subnet CIDR for Private Endpoints"
+  type        = list(string)
+  default     = ["10.0.1.128/26"]
+}
+
 variable "app_subnet_cidrs" {
   description = "Subnet CIDR for app"
   type        = list(string)
@@ -77,12 +83,6 @@ variable "admin_username" {
   sensitive   = true
 }
 
-#variable "admin_password" {
-#  description = "PostgreSQL admin password."
-#  type        = string
-#  sensitive   = true
-#}
-
 variable "psql_version" {
   description = "PostgreSQL version."
   type        = string
@@ -109,17 +109,6 @@ variable "auto_grow_enabled" {
   type        = bool
   default     = false
 }
-
-#variable "storage_tier" {
-#  description = "DB storage tier."
-#  type        = string
-#  default     = "P4"
-#
-#  validation {
-#    condition     = contains(["P4", "P6", "P10", "P15", "P20", "P30", "P40", "P50", "P60", "P70", "P80"], var.storage_tier)
-#    error_message = "Accepted values are P4, P6, P10, P15, P20, P30, P40, P50, P60, P70, or P80"
-#  }
-#}
 
 variable "sku_name" {
   description = "PostgreSQL server SKU. Follows the 'tier' + 'name' pattern."
@@ -168,4 +157,20 @@ variable "charset" {
   description = "Specifies the Charset for the database"
   type        = string
   default     = "utf8"
+}
+
+
+###-----------------------
+# Init VM
+#-------------------------
+variable "disable_password_authentication" {
+  description = "When true, use SSH key auth. When false, use password auth."
+  type        = bool
+  default     = false
+}
+
+variable "ssh_public_key_path" {
+  description = "Path to the SSH public key used for  the init VM admin user."
+  type        = string
+  default     = "~/.ssh/id_rsa.pub"
 }

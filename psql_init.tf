@@ -4,6 +4,13 @@ locals {
   allowed_extensions_list = [for ext in split(",", var.allowed_extensions) : trimspace(lower(ext))]
 }
 
+
+resource "random_password" "init_vm_password" {
+  length           = 8
+  special          = true
+  override_special = "!#$%&*()-_=+[]{}<>:?"
+}
+
 resource "azurerm_linux_virtual_machine" "psql_init" {
   count               = var.enable_initialization ? 1 : 0
   name                = "${var.psql_name}-init-vm"
@@ -11,12 +18,18 @@ resource "azurerm_linux_virtual_machine" "psql_init" {
   location            = var.location
   size                = "Standard_B1s" # cheapest, fine for a jump box
   admin_username      = "azureuser"
-
+                                                                                                                                                              
   network_interface_ids = [azurerm_network_interface.psql_init[count.index].id]
 
-  admin_ssh_key {
-    username   = "azureuser"
-    public_key = file("~/.ssh/id_rsa.pub")
+  disable_password_authentication = var.disable_password_authentication
+  admin_password                  = var.disable_password_authentication ? null : random_password.init_vm_password.result
+
+  dynamic "admin_ssh_key" {
+    for_each = var.disable_password_authentication ? [1] : []
+    content {
+      username   = "azureuser"
+      public_key = file(var.ssh_public_key_path)
+    }
   }
 
   os_disk {

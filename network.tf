@@ -15,10 +15,15 @@ resource "azurerm_subnet" "bastion" {
   resource_group_name  = azurerm_resource_group.db_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = var.bastion_subnet_cidrs
+}
 
-  depends_on = [
-    azurerm_virtual_network.vnet
-  ]
+resource "azurerm_subnet" "pe" {
+  name                 = "pe-subnetnet"
+  resource_group_name  = azurerm_resource_group.db_rg.name
+  virtual_network_name = azurerm_virtual_network.vnet.name
+  address_prefixes     = var.pe_subnet_cidrs
+
+  private_endpoint_network_policies = "Disabled"
 }
 
 resource "azurerm_subnet" "app" {
@@ -28,10 +33,6 @@ resource "azurerm_subnet" "app" {
   address_prefixes     = var.app_subnet_cidrs
 
   service_endpoints = ["Microsoft.KeyVault"]
-
-  depends_on = [
-    azurerm_virtual_network.vnet
-  ]
 }
 
 resource "azurerm_subnet" "db" {
@@ -50,10 +51,6 @@ resource "azurerm_subnet" "db" {
       ]
     }
   }
-
-  depends_on = [
-    azurerm_virtual_network.vnet
-  ]
 }
 
 

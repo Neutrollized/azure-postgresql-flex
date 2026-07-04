@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [0.6.0] - 2026-07-03
+### Added
+- Added Private Endpoint subnet
+- Added variable, `disable_password_authentication` (default: `false`), which then triggers the use of a random password for VM admin. If set `true`, uses SSH key auth instead.
+### Removed
+- Redundant `depends_on` statements for subnet resources
+
 ## [0.5.0] - 2026-07-02
 ### Added
 - Added `network_acl` configuration for Azure Key Vault for additional security
