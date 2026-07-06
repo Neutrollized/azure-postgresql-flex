@@ -1,6 +1,6 @@
-output "_bastion_connection_string" {
-  value       = "az network bastion ssh --name ${azurerm_bastion_host.bastion.name} --resource-group ${azurerm_resource_group.db_rg.name} --target-resource-id ${azurerm_linux_virtual_machine.jumpbox.id} --auth-type ssh-key --username azureuser --ssh-key ~/.ssh/id_rsa"
-  description = "Connection to Linux VM via Azure Bastion"
+output "_bastion_ssh_access" {
+  value       = "via Azure Portal -> jumpbox VM -> Connect (left-hand nav panel) -> Bastion -> Provide credentials and SSH key to open new browser window to connect"
+  description = "Connecting to Linux VM via Bastion"
 }
 
 output "_connect_to_postgres_flex_string" {

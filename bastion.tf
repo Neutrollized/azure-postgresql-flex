@@ -1,28 +1,17 @@
 #---------------------------------------------
-# Azure Bastion
+# Azure Bastion + Linux VM Jumpbox
 #---------------------------------------------
-resource "azurerm_public_ip" "bastion" {
-  name                = "bastion_ext_ip"
-  resource_group_name = azurerm_resource_group.db_rg.name
-  location            = var.location
-  allocation_method   = "Static"
-  sku                 = "Standard"
-}
-
 resource "azurerm_bastion_host" "bastion" {
   name                = "bastion-host"
   resource_group_name = azurerm_resource_group.db_rg.name
   location            = var.location
-  sku                 = "Standard"
-  tunneling_enabled   = true
+  sku                 = "Developer"
+  virtual_network_id  = azurerm_virtual_network.vnet.id
 
-  ip_configuration {
-    name                 = "configuration"
-    subnet_id            = azurerm_subnet.bastion.id
-    public_ip_address_id = azurerm_public_ip.bastion.id
-  }
+  depends_on = [
+    azurerm_virtual_network.vnet
+  ]
 }
-
 
 # Small jump box VM in the same VNet
 resource "azurerm_linux_virtual_machine" "jumpbox" {

@@ -22,16 +22,10 @@ variable "vnet_cidrs" {
   default     = ["10.0.0.0/16"]
 }
 
-variable "bastion_subnet_cidrs" {
-  description = "Subnet CIDR for Bastion"
-  type        = list(string)
-  default     = ["10.0.1.0/26"]
-}
-
 variable "pe_subnet_cidrs" {
   description = "Subnet CIDR for Private Endpoints"
   type        = list(string)
-  default     = ["10.0.1.128/26"]
+  default     = ["10.0.1.0/24"]
 }
 
 variable "app_subnet_cidrs" {

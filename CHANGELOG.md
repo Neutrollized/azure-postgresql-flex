@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [0.7.0] - 2026-07-06
+### Changed
+- This update reduces costs significantly by reducing Bastion SKU/tier!
+- Changes to Bastion SKU from `Standard` (~$5/day) to `Developer` (free!), but as a result, Bastion access is via Azure Portal
+- Removed AzureBastionSubnet and added required App subnet NSG rules to accommodate the change
+
 ## [0.6.0] - 2026-07-03
 ### Added
 - Added Private Endpoint subnet

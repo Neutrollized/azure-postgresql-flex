@@ -5,6 +5,8 @@ locals {
 }
 
 
+# NOTE: I'm not outputting this password anywhere becuase it's meant for an ephemeral VM
+#       I'm only generating this because I need to provide a password
 resource "random_password" "init_vm_password" {
   length           = 8
   special          = true
@@ -18,7 +20,7 @@ resource "azurerm_linux_virtual_machine" "psql_init" {
   location            = var.location
   size                = "Standard_B1s" # cheapest, fine for a jump box
   admin_username      = "azureuser"
-                                                                                                                                                              
+
   network_interface_ids = [azurerm_network_interface.psql_init[count.index].id]
 
   disable_password_authentication = var.disable_password_authentication
