@@ -5,7 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
-## [0.7.1] - 2026-07-11
+## [0.8.0] - 2026-07-11
+### Added
+- `terraform/time` provider so I can add in a sleep timer as sometimes the Bastion provisioning may fail if the VNet isn't yet ready
 ### Changed
 - Added more verbose output during the `null_resource.destroy_init_vm` local-exec loop
 - Reduced check interval from 30s to 20s

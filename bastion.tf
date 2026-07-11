@@ -1,6 +1,14 @@
 #---------------------------------------------
 # Azure Bastion + Linux VM Jumpbox
 #---------------------------------------------
+resource "time_sleep" "wait_for_vnet" {
+  create_duration = "30s"
+
+  depends_on = [
+    azurerm_virtual_network.vnet
+  ]
+}
+
 resource "azurerm_bastion_host" "bastion" {
   name                = "bastion-host"
   resource_group_name = azurerm_resource_group.db_rg.name
@@ -9,7 +17,8 @@ resource "azurerm_bastion_host" "bastion" {
   virtual_network_id  = azurerm_virtual_network.vnet.id
 
   depends_on = [
-    azurerm_virtual_network.vnet
+    azurerm_virtual_network.vnet,
+    time_sleep.wait_for_vnet
   ]
 }
 
