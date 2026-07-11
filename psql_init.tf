@@ -97,13 +97,13 @@ resource "null_resource" "destroy_init_vm" {
 
   # simple, static sleep timer
   #provisioner "local-exec" {
-  #  command = "sleep 480 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name ${var.psql_name}-init-vm"
+  #  command = "sleep 360 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name ${var.psql_name}-init-vm"
   #}
 
   provisioner "local-exec" {
     command = <<-EOT
       set -e
-      for i in $(seq 1 16); do
+      for i in $(seq 1 18); do
         STATUS=$(az vm run-command invoke \
           --resource-group ${azurerm_resource_group.db_rg.name} \
           --name ${var.psql_name}-init-vm \
@@ -130,8 +130,8 @@ resource "null_resource" "destroy_init_vm" {
         echo "$LOG_TAIL"
         echo "------------------------------------------------------"
 
-        echo "Attempt $i: init not complete yet, retrying in 30s..."
-        sleep 30
+        echo "Attempt $i: init not complete yet, retrying in 20s..."
+        sleep 20
       done
 
       echo "Timed out waiting for init to complete"
