@@ -119,6 +119,17 @@ resource "null_resource" "destroy_init_vm" {
           exit 0
         fi
 
+        LOG_TAIL=$(az vm run-command invoke \
+          --resource-group ${azurerm_resource_group.db_rg.name} \
+          --name ${var.psql_name}-init-vm \
+          --command-id RunShellScript \
+          --scripts "tail -n 5 /var/log/cloud-init-output.log 2>/dev/null || echo 'log not found yet'" \
+          --query "value[0].message" -o tsv 2>/dev/null || echo "could not fetch log")
+
+        echo "--- last 5 lines of /var/log/cloud-init-output.log ---"
+        echo "$LOG_TAIL"
+        echo "------------------------------------------------------"
+
         echo "Attempt $i: init not complete yet, retrying in 30s..."
         sleep 30
       done
