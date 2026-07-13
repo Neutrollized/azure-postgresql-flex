@@ -53,14 +53,14 @@ for i in {1..10}; do
   sleep 10
 done
 
-# creates a separate connection + create extension command
-# for every ext in allowed_extensions
-%{ for ext in allowed_extensions ~}
-PGPASSWORD="$${DB_PASSWORD}" psql \
-  "host=${db_host} port=5432 dbname=${db_name} user=$${DB_USER} sslmode=require" \
-  -c "CREATE EXTENSION IF NOT EXISTS \"${ext}\" CASCADE;"
 
-%{ endfor ~}
+# connect and execute each SQL file
+for f in $(ls /opt/psql_init/sql/*.sql | sort); do
+  echo "Running $f"
+  PGPASSWORD="$${DB_PASSWORD}" psql \
+    "host=${db_host} port=5432 dbname=${db_name} user=$${DB_USER} sslmode=require" \
+    -f "$f"
+done
 
 # Signal success
 touch /tmp/psql_init_done

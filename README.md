@@ -29,3 +29,11 @@ If you wish to validate, you can connect to the jumpbox via bastion and connect 
 ```sql 
 SELECT * FROM pg_available_extensions;
 ```
+
+> [!TIP]
+> Schema: `\dn`
+> Default access privileges: `\ddp`
+> Users: `\du`
+> Tables: `\dt` (`\dt [schema].*` to see tables in other schemas)
+> Functions: `\df` 
+> Triggers: `\dS` 

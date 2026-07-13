@@ -168,3 +168,193 @@ variable "ssh_public_key_path" {
   type        = string
   default     = "~/.ssh/id_rsa.pub"
 }
+
+
+###-----------------------
+# SQL commands vars
+#-------------------------
+variable "sql_schema_names" {
+  description = "List of schemas to create in the database"
+  type        = list(string)
+  default     = []
+
+  #default = ["staging", "core", "reporting"]
+}
+
+variable "sql_roles" {
+  description = "Map of roles to create: role name => whether it's LOGIN and needs a password"
+  type = map(object({
+    login    = bool
+    password = optional(string) # name of Key Vault secret holding the password, if login = true
+  }))
+  default = {}
+
+  #default = {
+  #  user01 = { login = false }
+  #  user02 = { login = false }
+  #  user03 = { login = true, password = "myPa55w0rd" }
+  #}
+}
+
+variable "sql_user_role_grants" {
+  description = "Map of role => { schemas => [...], privileges => [...] }"
+  type = list(object({
+    role = string
+    user = string
+  }))
+  default = []
+
+  #default = [
+  #  { role = "postgresuser", user = "geoserver_db_user" }
+  #]
+}
+
+variable "sql_db_conn_grants" {
+  description = "List of databases to revoke default PUBLIC connect/temporary permissions from"
+  type = map(object({
+    connect_roles   = list(string) # CONNECT or TEMPORARY
+    temporary_roles = list(string) # list of roles 
+  }))
+  default = {}
+
+  #default = {
+  #  my_db = {
+  #    connect_roles   = ["loader_role", "publisher_role", "geoserver_role", "geoserver_db_user"]
+  #    temporary_roles = ["loader_role", "publisher_role"]
+  #  }
+  #}
+}
+
+variable "sql_schema_privileges" {
+  description = "Nested map structuring privileges by Role -> Schema -> Privileges"
+  type = map(map(object({
+    schema_privileges   = list(string) # e.g., ["USAGE", "CREATE"]
+    table_privileges    = list(string) # e.g., ["SELECT", "INSERT"]
+    sequence_privileges = list(string) # e.g., ["USAGE", "SELECT"]
+  })))
+  default = {}
+
+  #default = {
+  #  reporting_user = {
+  #    core = {
+  #      schema_privileges   = ["USAGE"]
+  #      table_privileges    = ["SELECT"]
+  #      sequence_privileges = ["USAGE"]
+  #    }
+  #    analytics = {
+  #      schema_privileges   = ["USAGE"]
+  #      table_privileges    = ["SELECT"]
+  #      sequence_privileges = ["USAGE"]
+  #    }
+  #  }
+  #  app_user = {
+  #    core = {
+  #      schema_privileges   = ["USAGE", "CREATE"]
+  #      table_privileges    = ["SELECT", "INSERT", "UPDATE", "DELETE"]
+  #      sequence_privileges = ["USAGE", "SELECT", "UPDATE"]
+  #    }
+  #  }
+  #}
+}
+
+variable "sql_default_schema_privileges" {
+  description = "Nested map structuring privileges by Role -> Schema -> Privileges"
+  type = map(map(object({
+    table_privileges    = list(string) # e.g., ["SELECT", "INSERT"]
+    sequence_privileges = list(string) # e.g., ["USAGE", "SELECT"]
+    grantee_roles       = list(string) # ensures newly created tables are accessible
+  })))
+  default = {}
+
+  #default = {
+  #  reporting_user = {
+  #    core = {
+  #      table_privileges    = ["SELECT"]
+  #      sequence_privileges = ["USAGE"]
+  #      grantee_roles       = ["app_user"]
+  #    }
+  #    analytics = {
+  #      table_privileges    = ["SELECT"]
+  #      sequence_privileges = ["USAGE"]
+  #      grantee_roles       = ["app_user","reporting_user"]
+  #    }
+  #  }
+  #}
+}
+
+variable "sql_database_tables" {
+  description = "Detailed blueprint of tables including fields, constraints, grants, and indexes"
+  type = map(object({
+    schema = string
+    fields = list(object({
+      name               = string
+      type               = string
+      null               = optional(bool, true)
+      default_value      = optional(string)
+      inline_constraints = optional(list(string), [])
+    }))
+    primary_keys = list(string)
+    constraints  = optional(list(string), [])
+    grants       = map(list(string))
+
+    # --- Added for Indexes ---
+    indexes = optional(list(object({
+      name    = string
+      columns = list(string)
+      unique  = optional(bool, false)
+      type    = optional(string, "btree") # btree, gin, gist, hash, etc.
+    })), [])
+  }))
+  default = {}
+
+  #default = {
+  #  user_profiles = {
+  #    schema       = "core"
+  #    fields = [
+  #      { name = "profile_id", type = "SERIAL", null = false },
+  #      { name = "user_id", type = "INTEGER", null = false },
+  #      { name = "email", type = "VARCHAR(255)", null = false },
+  #      { name = "metadata", type = "JSONB", null = true }
+  #    ]
+  #    primary_keys = ["profile_id"]
+  #    constraints = [
+  #      "CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES core.users(id)"
+  #    ]
+  #    grants = {
+  #      app_user = ["SELECT", "INSERT", "UPDATE"]
+  #    }
+  #    indexes = [
+  #      {
+  #        name    = "idx_user_profiles_email_lower"
+  #        columns = ["LOWER(email)"] # Supports expression indexes!
+  #        unique  = true
+  #      },
+  #      {
+  #       name    = "idx_user_profiles_metadata"
+  #        columns = ["metadata"]
+  #        type    = "gin" # Perfect for JSONB columns
+  #      }
+  #     ]
+  #  }
+  #}
+}
+
+variable "sql_triggers" {
+  description = "A map of tables that require an automated updated_at timestamp trigger"
+  type = map(object({
+    schema = string
+    table  = string
+  }))
+  default = {}
+
+  #default = {
+  #  pub_registry_trigger = {
+  #    schema = "platform_metadata"
+  #    table  = "publication_registry"
+  #  }
+  #  user_accounts_trigger = {
+  #    schema = "core"
+  #    table  = "user_accounts"
+  #  }
+  #}
+}

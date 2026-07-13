@@ -2,6 +2,88 @@
 # i.e. "POSTGIS, POSTGIS_RASTER" -> ["postgis", "postgis_raster"]
 locals {
   allowed_extensions_list = [for ext in split(",", var.allowed_extensions) : trimspace(lower(ext))]
+
+  # everything except the templated extensions file will be discovered dynamically
+  extra_sql_files = fileset("${path.module}/scripts/sql", "*.sql")
+
+  sql_files = merge(
+    {
+      "00_extensions.sql" = templatefile("${path.module}/scripts/sql/00_extensions.sql.tpl", {
+        allowed_extensions = local.allowed_extensions_list
+      })
+    },
+    length(var.sql_schema_names) > 0 ? {
+      "01_schemas.sql" = templatefile("${path.module}/scripts/sql/01_schemas.sql.tpl", {
+        schema_names = var.sql_schema_names
+      })
+    } : {},
+    length(var.sql_roles) > 0 ? {
+      "02a_roles.sql" = templatefile("${path.module}/scripts/sql/02a_roles.sql.tpl", {
+        roles = var.sql_roles
+      })
+    } : {},
+    length(var.sql_user_role_grants) > 0 ? {
+      "02b_role_grants.sql" = templatefile("${path.module}/scripts/sql/02b_role_grants.sql.tpl", {
+        user_role_grants = var.sql_user_role_grants
+      })
+    } : {},
+    length(var.sql_db_conn_grants) > 0 ? {
+      "03_db_conn_grants.sql" = templatefile("${path.module}/scripts/sql/03_db_conn_grants.sql.tpl", {
+        db_conn_grants = var.sql_db_conn_grants
+      })
+    } : {},
+    length(var.sql_schema_privileges) > 0 ? {
+      "04a_schema_privs.sql" = templatefile("${path.module}/scripts/sql/04a_schema_privs.sql.tpl", {
+        schema_privileges = var.sql_schema_privileges
+      })
+    } : {},
+    length(var.sql_default_schema_privileges) > 0 ? {
+      "04b_default_schema_privs.sql" = templatefile("${path.module}/scripts/sql/04b_default_schema_privs.sql.tpl", {
+        default_schema_privileges = var.sql_default_schema_privileges
+      })
+    } : {},
+    length(var.sql_database_tables) > 0 ? {
+      "05a_create_tables.sql" = templatefile("${path.module}/scripts/sql/05a_create_tables.sql.tpl", {
+        database_tables = var.sql_database_tables
+      })
+    } : {},
+    length(var.sql_triggers) > 0 ? {
+      "05b_triggers.sql" = templatefile("${path.module}/scripts/sql/05b_triggers.sql.tpl", {
+        triggers               = var.sql_triggers
+        unique_trigger_schemas = distinct([for k, v in var.sql_triggers : v.schema])
+      })
+    } : {},
+    { for fname in local.extra_sql_files : fname => file("${path.module}/scripts/sql/${fname}") }
+  )
+}
+
+data "cloudinit_config" "psql_init" {
+  gzip          = false
+  base64_encode = true
+
+  part {
+    content_type = "text/cloud-config"
+    content = yamlencode({
+      write_files = [
+        for fname, content in local.sql_files : {
+          path        = "/opt/psql_init/sql/${fname}"
+          permissions = "0644"
+          content     = content
+        }
+      ]
+    })
+  }
+
+  part {
+    content_type = "text/x-shellscript"
+    content = templatefile("${path.module}/scripts/psql_init.sh", {
+      db_host                = azurerm_postgresql_flexible_server.psql.fqdn
+      db_name                = azurerm_postgresql_flexible_server_database.gis_db.name
+      akv_name               = azurerm_key_vault.kv.name
+      akv_secret_db_username = azurerm_key_vault_secret.db_username.name
+      akv_secret_db_password = azurerm_key_vault_secret.db_password.name
+    })
+  }
 }
 
 
@@ -50,14 +132,7 @@ resource "azurerm_linux_virtual_machine" "psql_init" {
     type = "SystemAssigned"
   }
 
-  custom_data = base64encode(templatefile("${path.module}/scripts/psql_init.sh", {
-    db_host                = azurerm_postgresql_flexible_server.psql.fqdn
-    db_name                = azurerm_postgresql_flexible_server_database.gis_db.name
-    akv_name               = azurerm_key_vault.kv.name
-    akv_secret_db_username = azurerm_key_vault_secret.db_username.name
-    akv_secret_db_password = azurerm_key_vault_secret.db_password.name
-    allowed_extensions     = local.allowed_extensions_list
-  }))
+  custom_data = data.cloudinit_config.psql_init.rendered
 
   depends_on = [
     azurerm_postgresql_flexible_server_configuration.enable_exts,
@@ -97,13 +172,19 @@ resource "null_resource" "destroy_init_vm" {
 
   # simple, static sleep timer
   #provisioner "local-exec" {
-  #  command = "sleep 360 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name ${var.psql_name}-init-vm"
+  #  command = "sleep 300 && az vm delete --yes --resource-group ${azurerm_resource_group.db_rg.name} --name ${var.psql_name}-init-vm"
   #}
 
   provisioner "local-exec" {
     command = <<-EOT
       set -e
-      for i in $(seq 1 18); do
+
+      az vm update \
+        --resource-group ${azurerm_resource_group.db_rg.name} \
+        --name ${var.psql_name}-init-vm \
+        --set storageProfile.osDisk.deleteOption=Delete
+
+      for i in $(seq 1 15); do
         STATUS=$(az vm run-command invoke \
           --resource-group ${azurerm_resource_group.db_rg.name} \
           --name ${var.psql_name}-init-vm \
@@ -123,10 +204,10 @@ resource "null_resource" "destroy_init_vm" {
           --resource-group ${azurerm_resource_group.db_rg.name} \
           --name ${var.psql_name}-init-vm \
           --command-id RunShellScript \
-          --scripts "tail -n 5 /var/log/cloud-init-output.log 2>/dev/null || echo 'log not found yet'" \
+          --scripts "tail -n 10 /var/log/cloud-init-output.log 2>/dev/null || echo 'log not found yet'" \
           --query "value[0].message" -o tsv 2>/dev/null || echo "could not fetch log")
 
-        echo "--- last 5 lines of /var/log/cloud-init-output.log ---"
+        echo "--- last 10 lines of /var/log/cloud-init-output.log ---"
         echo "$LOG_TAIL"
         echo "------------------------------------------------------"
 

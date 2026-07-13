@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [0.9.0] - 2026-07-13
+### Added
+- `hashicorp/cloudinit` provider for managing/rendering Cloud Init configs
+### Changed
+- Major changes to how the server is initializerd
+- SQL statements are run with multiple templated SQL scripts in `scripts/sql`
+
 ## [0.8.0] - 2026-07-11
 ### Added
 - `terraform/time` provider so I can add in a sleep timer as sometimes the Bastion provisioning may fail if the VNet isn't yet ready
