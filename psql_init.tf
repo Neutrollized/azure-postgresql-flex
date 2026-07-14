@@ -205,7 +205,7 @@ resource "null_resource" "destroy_init_vm" {
           --name ${var.psql_name}-init-vm \
           --command-id RunShellScript \
           --scripts "tail -n 10 /var/log/cloud-init-output.log 2>/dev/null || echo 'log not found yet'" \
-          --query "value[0].message" -o tsv 2>/dev/null || echo "could not fetch log")
+          --query "value[0].message" -o tsv 2>/dev/null || echo "az vm run-command invoke call failed")
 
         echo "--- last 10 lines of /var/log/cloud-init-output.log ---"
         echo "$LOG_TAIL"

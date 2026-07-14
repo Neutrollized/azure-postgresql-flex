@@ -3,9 +3,10 @@
 set -e
 exec > /var/log/cloud-init-output.log 2>&1
 
-echo "export TERM=xterm-256color" | sudo tee /etc/profile.d/set-term.sh
 export TERM=xterm-256color
 export PAGER=cat
+
+echo "\n----- STARTING psql_init.sh -----\n"
 
 apt-get update -y
 apt-get install -y postgresql-client
