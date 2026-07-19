@@ -14,10 +14,10 @@ apt-get install -y postgresql-client
 # install azure-cli
 curl -fsSL 'https://azurecliprod.blob.core.windows.net/$root/deb_install.sh' | sudo bash
 
-# login using managed identity
+echo "Login using managed identity..."
 az login --identity --allow-no-subscriptions
-# Wait for managed identity to be available
-echo "Giving time for managed identity permissions to propagate..."
+
+echo "Giving time for manage identity permissions to propagate..."
 for i in {1..30}; do
   if az keyvault secret show \
        --vault-name ${akv_name} \
@@ -30,12 +30,13 @@ for i in {1..30}; do
   sleep 10
 done
 
-# Fetch secrets from Key Vault
+echo "Fetching DB username from Key Vault..."
 export DB_USER=$(az keyvault secret show \
   --vault-name ${akv_name} \
   --name ${akv_secret_db_username} \
   --query value -o tsv)
 
+echo "Fetching DB password from Key Vault..."
 export DB_PASSWORD=$(az keyvault secret show \
   --vault-name ${akv_name} \
   --name ${akv_secret_db_password} \
@@ -55,7 +56,7 @@ for i in {1..10}; do
 done
 
 
-# connect and execute each SQL file
+echo "Executing SQL scripts..."
 for f in $(ls /opt/psql_init/sql/*.sql | sort); do
   echo "Running $f"
   PGPASSWORD="$${DB_PASSWORD}" psql \
