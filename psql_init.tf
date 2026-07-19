@@ -153,13 +153,12 @@ resource "azurerm_network_interface" "psql_init" {
   }
 }
 
-resource "azurerm_key_vault_access_policy" "vm_identity" {
-  count        = var.enable_initialization ? 1 : 0
-  key_vault_id = azurerm_key_vault.kv.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_linux_virtual_machine.psql_init[count.index].identity[0].principal_id
+resource "azurerm_role_assignment" "vm_identity" {
+  count                = var.enable_initialization ? 1 : 0
+  scope                = azurerm_key_vault.kv.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_linux_virtual_machine.psql_init[count.index].identity[0].principal_id
 
-  secret_permissions = ["Get", "List"]
 }
 
 # cleanup psql init vm

@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [0.10.0] - 2026-07-18
+### Changed
+- Azure Key Vault to use [RBAC for authorization](https://learn.microsoft.com/en-us/azure/key-vault/general/access-control-default?tabs=azure-cli) over the legacy vault access policies
+- Access policies replaced by role assignments
+
 ## [0.9.1] - 2026-07-14
 ### Changed
 - Updated error message when `azure vm run-command invoke` in `null_resource.destroy_init_vm` fails to make it more clear

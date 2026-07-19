@@ -25,12 +25,7 @@ resource "azurerm_key_vault" "kv" {
   sku_name                 = "standard"
   purge_protection_enabled = false
 
-  access_policy {
-    tenant_id = data.azurerm_client_config.current.tenant_id
-    object_id = data.azurerm_client_config.current.object_id
-
-    secret_permissions = ["Get", "Set", "Delete", "List", "Purge"]
-  }
+  rbac_authorization_enabled = true
 
   network_acls {
     bypass                     = "AzureServices"
@@ -40,13 +35,29 @@ resource "azurerm_key_vault" "kv" {
   }
 }
 
+# gives Terraform permission to manage secrets,
+# otherwise you get RBAC error during secret creation step
+resource "azurerm_role_assignment" "terraform_secrets_officer" {
+  scope                = azurerm_key_vault.kv.id
+  role_definition_name = "Key Vault Secrets Officer"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
+# wait for Azure RBAC propagation
+resource "time_sleep" "wait_for_rbac" {
+  depends_on = [azurerm_role_assignment.terraform_secrets_officer]
+
+  create_duration = "30s"
+}
+
+
 resource "azurerm_key_vault_secret" "db_username" {
   name         = "${var.psql_name}-admin-username"
   value        = var.admin_username
   key_vault_id = azurerm_key_vault.kv.id
 
   depends_on = [
-    azurerm_key_vault.kv
+    time_sleep.wait_for_rbac
   ]
 }
 
@@ -56,7 +67,7 @@ resource "azurerm_key_vault_secret" "db_password" {
   key_vault_id = azurerm_key_vault.kv.id
 
   depends_on = [
-    azurerm_key_vault.kv
+    time_sleep.wait_for_rbac
   ]
 }
 
