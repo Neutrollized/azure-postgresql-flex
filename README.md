@@ -7,10 +7,15 @@ Core resources used:
 - Azure Bastion
 - Azure Linux VM
 - Azure Key Vault
+- Azure Private Endpoint
+
+> [!NOTE]
+> If you deploy in separate resource groups, Private DNS Zone + Virtual Network Link should be in your Network RG,
+> while the Private Endpoint should be in your Database and Key Vault RGs as they align with the resource's lifecycle. 
 
 
 # Prerequisites
-You will need the Azure CLI and the following [extensions](https://learn.microsoft.com/en-us/cli/azure/azure-cli-extensions-list?view=azure-cli-latest):
+You will need the Azure CLI and the following [extensions](https://learn.microsoft.com/en-us/cli/azure/azure-cli-extensions-list?view=azure-cli-latest) if you're using the *Standard Bastion SKU*:
 ```sh
 az extension add --name bastion
 az extension add --name ssh

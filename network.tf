@@ -110,3 +110,26 @@ resource "azurerm_subnet_network_security_group_association" "app_nsg_assoc" {
   subnet_id                 = azurerm_subnet.app.id
   network_security_group_id = azurerm_network_security_group.app_nsg.id
 }
+
+resource "azurerm_network_security_group" "pe_nsg" {
+  name                = "peSubnetNSG"
+  location            = var.location
+  resource_group_name = azurerm_resource_group.db_rg.name
+
+  security_rule {
+    name                       = "allow-pe-access"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = azurerm_subnet.pe.address_prefixes[0]
+  }
+}
+
+resource "azurerm_subnet_network_security_group_association" "pe_nsg_assoc" {
+  subnet_id                 = azurerm_subnet.pe.id
+  network_security_group_id = azurerm_network_security_group.pe_nsg.id
+}

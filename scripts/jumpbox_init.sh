@@ -4,7 +4,7 @@ set -e
 echo "export TERM=xterm-256color" | sudo tee /etc/profile.d/set-term.sh
 
 apt-get update -y
-apt-get install -y postgresql-client git
+apt-get install -yq postgresql-client git
 
 # install azure-cli
 curl -fsSL 'https://azurecliprod.blob.core.windows.net/$root/deb_install.sh' | sudo bash

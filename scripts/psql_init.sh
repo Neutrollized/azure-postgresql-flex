@@ -9,7 +9,7 @@ export PAGER=cat
 echo "\n----- STARTING psql_init.sh -----\n"
 
 apt-get update -y
-apt-get install -y postgresql-client
+apt-get install -yq postgresql-client
 
 # install azure-cli
 curl -fsSL 'https://azurecliprod.blob.core.windows.net/$root/deb_install.sh' | sudo bash

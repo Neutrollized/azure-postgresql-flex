@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [0.11.0] - 2026-07-20
+### Added
+- Azure Private Endpoints resources for Azure Key Vault and Azure PostgreSQL Flexible
+### Changed
+- Moved Key Vault resources to its own Terraform file (`keyvault.tf`) for better organization
+
 ## [0.10.0] - 2026-07-18
 ### Changed
 - Azure Key Vault to use [RBAC for authorization](https://learn.microsoft.com/en-us/azure/key-vault/general/access-control-default?tabs=azure-cli) over the legacy vault access policies
