@@ -184,6 +184,17 @@ resource "null_resource" "destroy_init_vm" {
         --set storageProfile.osDisk.deleteOption=Delete
 
       for i in $(seq 1 15); do
+        LOG_TAIL=$(az vm run-command invoke \
+          --resource-group ${azurerm_resource_group.db_rg.name} \
+          --name ${var.psql_name}-init-vm \
+          --command-id RunShellScript \
+          --scripts "tail -n 10 /var/log/cloud-init-output.log 2>/dev/null || echo 'log not found yet'" \
+          --query "value[0].message" -o tsv || echo "az vm run-command invoke call failed")
+
+        echo "--- last 10 lines of /var/log/cloud-init-output.log ---"
+        echo "$LOG_TAIL"
+        echo "------------------------------------------------------"
+
         STATUS=$(az vm run-command invoke \
           --resource-group ${azurerm_resource_group.db_rg.name} \
           --name ${var.psql_name}-init-vm \
@@ -198,17 +209,6 @@ resource "null_resource" "destroy_init_vm" {
             --name ${var.psql_name}-init-vm
           exit 0
         fi
-
-        LOG_TAIL=$(az vm run-command invoke \
-          --resource-group ${azurerm_resource_group.db_rg.name} \
-          --name ${var.psql_name}-init-vm \
-          --command-id RunShellScript \
-          --scripts "tail -n 10 /var/log/cloud-init-output.log 2>/dev/null || echo 'log not found yet'" \
-          --query "value[0].message" -o tsv || echo "az vm run-command invoke call failed")
-
-        echo "--- last 10 lines of /var/log/cloud-init-output.log ---"
-        echo "$LOG_TAIL"
-        echo "------------------------------------------------------"
 
         echo "Attempt $i: init not complete yet, retrying in 20s..."
         sleep 20
