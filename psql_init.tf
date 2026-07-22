@@ -158,8 +158,8 @@ resource "azurerm_role_assignment" "vm_identity" {
   scope                = azurerm_key_vault.kv.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_linux_virtual_machine.psql_init[count.index].identity[0].principal_id
-
 }
+
 
 # cleanup psql init vm
 resource "null_resource" "destroy_init_vm" {
