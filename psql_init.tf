@@ -186,10 +186,6 @@ resource "azapi_update_resource" "vm_os_disk_delete" {
       }
     }
   }
-
-  depends_on = [
-    azurerm_linux_virtual_machine.psql_init
-  ]
 }
 
 
