@@ -25,6 +25,10 @@ terraform {
       source  = "hashicorp/time"
       version = "~> 0.14"
     }
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 2.0"
+    }
   }
 }
 
@@ -47,3 +51,6 @@ provider "azurerm" {
 
 # https://registry.terraform.io/providers/hashicorp/azuread/latest/docs
 provider "azuread" {}
+
+# https://registry.terraform.io/providers/azure/azapi/latest/docs
+provider "azapi" {}

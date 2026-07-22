@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [0.12.0] - 2026-07-22
+### Added
+- `azure/azapi` provider to change init VM's properties
+### Changed
+- Improved template logic in `scripts/sql/01_schemas.sql.tpl` and `scripts/sql/05a_create_tables.sql.tpl`
+- Using AzAPI instead of `az vm update` to set OS disk to delete mode
+- Also deleting init VM's NIC when VM is deleted
+
 ## [0.11.1] - 2026-07-21
 ### Changed
 - Reordered `az vm run-command invoke` command order in the `null_resource.destroy_init_vm`

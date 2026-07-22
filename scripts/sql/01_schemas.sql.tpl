@@ -6,7 +6,13 @@ CREATE SCHEMA IF NOT EXISTS ${schema};
 %{ endfor ~}
 
 %{ if length(schema_names) > 0 ~}
-ALTER DATABASE IF EXISTS current_database() SET search_path TO ${join(", ", schema_names)}, public;
+DO $$
+BEGIN
+   EXECUTE format('ALTER DATABASE %I SET search_path TO %s, public', current_database(), '${join(", ", schema_names)}');
+END $$;
 %{ else ~}
-ALTER DATABASE IF EXISTS current_database() SET search_path TO public;
+DO $$
+BEGIN
+   EXECUTE format('ALTER DATABASE %I SET search_path TO public', current_database());
+END $$;
 %{ endif ~}

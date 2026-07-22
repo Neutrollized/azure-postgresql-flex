@@ -160,6 +160,38 @@ resource "azurerm_role_assignment" "vm_identity" {
   principal_id         = azurerm_linux_virtual_machine.psql_init[count.index].identity[0].principal_id
 }
 
+# this sets the Linux VM OS disk and NIC to delete when VM is deleted
+resource "azapi_update_resource" "vm_os_disk_delete" {
+  count     = var.enable_initialization ? 1 : 0
+  type      = "Microsoft.Compute/virtualMachines@2023-09-01"
+  name      = azurerm_linux_virtual_machine.psql_init[count.index].name
+  parent_id = "/subscriptions/${data.azurerm_subscription.primary.subscription_id}/resourceGroups/${azurerm_resource_group.db_rg.name}"
+
+  body = {
+    properties = {
+      storageProfile = {
+        osDisk = {
+          deleteOption = "Delete"
+        }
+      }
+      networkProfile = {
+        networkInterfaces = [
+          {
+            id = azurerm_network_interface.psql_init[count.index].id
+            properties = {
+              deleteOption = "Delete"
+            }
+          }
+        ]
+      }
+    }
+  }
+
+  depends_on = [
+    azurerm_linux_virtual_machine.psql_init
+  ]
+}
+
 
 # cleanup psql init vm
 resource "null_resource" "destroy_init_vm" {
@@ -178,12 +210,7 @@ resource "null_resource" "destroy_init_vm" {
     command = <<-EOT
       set -e
 
-      az vm update \
-        --resource-group ${azurerm_resource_group.db_rg.name} \
-        --name ${var.psql_name}-init-vm \
-        --set storageProfile.osDisk.deleteOption=Delete
-
-      for i in $(seq 1 15); do
+      for i in $(seq 1 20); do
         LOG_TAIL=$(az vm run-command invoke \
           --resource-group ${azurerm_resource_group.db_rg.name} \
           --name ${var.psql_name}-init-vm \
@@ -210,8 +237,8 @@ resource "null_resource" "destroy_init_vm" {
           exit 0
         fi
 
-        echo "Attempt $i: init not complete yet, retrying in 20s..."
-        sleep 20
+        echo "Attempt $i: init not complete yet, retrying in 15s..."
+        sleep 15
       done
 
       echo "Timed out waiting for init to complete"

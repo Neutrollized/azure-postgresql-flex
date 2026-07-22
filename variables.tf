@@ -212,8 +212,8 @@ variable "sql_user_role_grants" {
 variable "sql_db_conn_grants" {
   description = "List of databases to revoke default PUBLIC connect/temporary permissions from"
   type = map(object({
-    connect_roles   = list(string) # CONNECT or TEMPORARY
-    temporary_roles = list(string) # list of roles 
+    connect_roles   = list(string)
+    temporary_roles = list(string)
   }))
   default = {}
 
