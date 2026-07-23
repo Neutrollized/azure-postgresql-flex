@@ -137,6 +137,7 @@ resource "azurerm_linux_virtual_machine" "psql_init" {
   depends_on = [
     azurerm_postgresql_flexible_server_configuration.enable_exts,
     azurerm_postgresql_flexible_server_database.gis_db,
+    data.cloudinit_config.psql_init
   ]
 }
 

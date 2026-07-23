@@ -9,7 +9,7 @@ export PAGER=cat
 echo "\n----- STARTING psql_init.sh -----\n"
 
 apt-get update -y
-apt-get install -yq postgresql-client
+apt-get install -yq netcat-openbsd postgresql-client
 
 # install azure-cli
 curl -fsSL 'https://azurecliprod.blob.core.windows.net/$root/deb_install.sh' | sudo bash
@@ -44,15 +44,9 @@ export DB_PASSWORD=$(az keyvault secret show \
 
 
 echo "Waiting for PostgreSQL to be ready..."
-for i in {1..10}; do
-  if PGPASSWORD="$${DB_PASSWORD}" psql \
-    "host=${db_host} port=5432 dbname=${db_name} user=$${DB_USER} sslmode=require" \
-    -c "SELECT 1;" > /dev/null 2>&1; then
-    echo "PostgreSQL is ready"
-    break
-  fi
-  echo "Attempt $i failed, retrying in 10s..."
-  sleep 10
+until nc -z -v -w5 ${db_host} 5432; do
+  echo "Waiting for PostgreSQL database to become reachable..."
+  sleep 5
 done
 
 

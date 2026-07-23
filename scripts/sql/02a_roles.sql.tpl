@@ -1,4 +1,7 @@
 %{ for role, cfg in roles ~}
+-- ==========================================
+-- Create Roles
+-- ==========================================
 DO $$
 BEGIN
    IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${role}') THEN
