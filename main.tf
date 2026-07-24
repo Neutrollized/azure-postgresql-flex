@@ -49,6 +49,13 @@ resource "azurerm_postgresql_flexible_server" "psql" {
   storage_mb        = var.storage_mb
   auto_grow_enabled = var.auto_grow_enabled
 
+  dynamic "high_availability" {
+    for_each = var.ha_enabled ? [1] : []
+    content {
+      mode = var.ha_mode
+    }
+  }
+
   lifecycle {
     ignore_changes = [
       tags,

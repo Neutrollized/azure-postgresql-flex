@@ -110,6 +110,24 @@ variable "sku_name" {
   default     = "B_Standard_B1ms"
 }
 
+variable "ha_enabled" {
+  description = "When true, enable high availability."
+  type        = bool
+  default     = false
+}
+
+variable "ha_mode" {
+  description = "Sets high availability mode."
+  type        = string
+  default     = "ZoneRedundant"
+
+  validation {
+    condition     = contains(["SameZone", "ZoneRedundant"], var.ha_mode)
+    error_message = "Accepted values are SameZone or ZoneRedundant"
+  }
+}
+
+
 variable "pgbouncer_enabled" {
   description = "Value of the pgboucner.enable config"
   type        = bool

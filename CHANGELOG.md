@@ -5,6 +5,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [0.13.0] - 2026-07-24
+### Added
+- Added variable, `ha_enabled` (default: `false`) to toggle high availability
+- Added variable, `ha_mode` (default: `ZoneRedundant`) to set HA mode
+
 ## [0.12.1] - 2026-07-23
 ### Changed
 - Simplified PostgreSQL connectivity test in `scripts/psql_init.sh`
