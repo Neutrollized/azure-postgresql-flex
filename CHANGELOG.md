@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.13.0] - 2026-07-24
 ### Added
-- Added variable, `ha_enabled` (default: `false`) to toggle high availability
+- Added variable, `ha_enabled` (default: `false`) to toggle high availability (NOTE: cannot use Burstable SKUs with HA)
 - Added variable, `ha_mode` (default: `ZoneRedundant`) to set HA mode
 
 ## [0.12.1] - 2026-07-23
