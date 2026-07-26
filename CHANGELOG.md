@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [0.13.1] - 2026-07-26
+### Added
+- `examples/databricks` for a basic Databricks Secret Scope setup to allow you to connect from your Databricks environment to PostgreSQL Flex
+
 ## [0.13.0] - 2026-07-24
 ### Added
 - Added variable, `ha_enabled` (default: `false`) to toggle high availability (NOTE: cannot use Burstable SKUs with HA)
