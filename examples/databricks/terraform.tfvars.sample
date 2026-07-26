@@ -1,0 +1,4 @@
+dbx_host = "https://adb-1234567890987654.32.azuredatabricks.net"
+
+psql_kv_name    = "my-psql-flex-server-akv"
+psql_kv_rg_name = "my-psql-flex-rg"
