@@ -130,10 +130,6 @@ resource "azurerm_private_dns_zone_virtual_network_link" "psql" {
   private_dns_zone_name = azurerm_private_dns_zone.psql_dns.name
   virtual_network_id    = azurerm_virtual_network.vnet.id
   resource_group_name   = azurerm_resource_group.db_rg.name
-
-  #  depends_on = [
-  #  azurerm_subnet.db
-  #]
 }
 
 resource "azurerm_private_endpoint" "psql_pe" {

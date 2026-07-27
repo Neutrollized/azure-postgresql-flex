@@ -16,28 +16,15 @@ variable "location" {
 ###--------------------------
 # VNet
 #----------------------------
-variable "vnet_cidrs" {
-  description = "VNet CIDR"
-  type        = list(string)
-  default     = ["10.0.0.0/16"]
-}
-
-variable "pe_subnet_cidrs" {
-  description = "Subnet CIDR for Private Endpoints"
-  type        = list(string)
-  default     = ["10.0.1.0/24"]
-}
-
-variable "app_subnet_cidrs" {
-  description = "Subnet CIDR for app"
-  type        = list(string)
-  default     = ["10.0.2.0/24"]
-}
-
-variable "db_subnet_cidrs" {
-  description = "Subnet CIDR for database"
-  type        = list(string)
-  default     = ["10.0.3.0/24"]
+variable "network_cidrs" {
+  description = "CIDR ranges used throughout the VNet (vnet, pe, app, db)."
+  type = object({
+    vnet = optional(list(string), ["10.1.0.0/16"])
+    pe   = optional(list(string), ["10.1.1.0/24"])
+    app  = optional(list(string), ["10.1.2.0/24"])
+    db   = optional(list(string), ["10.1.3.0/24"])
+  })
+  default = {}
 }
 
 

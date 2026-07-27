@@ -7,14 +7,14 @@ resource "azurerm_virtual_network" "vnet" {
   name                = "postgres-vnet"
   location            = var.location
   resource_group_name = azurerm_resource_group.db_rg.name
-  address_space       = var.vnet_cidrs
+  address_space       = var.network_cidrs.vnet
 }
 
 resource "azurerm_subnet" "pe" {
   name                 = "pe-subnetnet"
   resource_group_name  = azurerm_resource_group.db_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = var.pe_subnet_cidrs
+  address_prefixes     = var.network_cidrs.pe
 
   private_endpoint_network_policies = "Disabled"
 }
@@ -23,7 +23,7 @@ resource "azurerm_subnet" "app" {
   name                 = "app-subnet"
   resource_group_name  = azurerm_resource_group.db_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = var.app_subnet_cidrs
+  address_prefixes     = var.network_cidrs.app
 
   service_endpoints = ["Microsoft.KeyVault"]
 }
@@ -32,7 +32,7 @@ resource "azurerm_subnet" "db" {
   name                 = "db-subnet"
   resource_group_name  = azurerm_resource_group.db_rg.name
   virtual_network_name = azurerm_virtual_network.vnet.name
-  address_prefixes     = var.db_subnet_cidrs
+  address_prefixes     = var.network_cidrs.db
 
   service_endpoints = ["Microsoft.Storage"]
   delegation {
@@ -60,7 +60,7 @@ resource "azurerm_network_security_group" "postgres_db_nsg" {
 
   security_rule {
     name                       = "allow-app-ingress"
-    priority                   = 101
+    priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"

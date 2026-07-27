@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.html).
 
 
+## [0.14.0] - 2026-07-27
+### Changed
+- Consolidated top-level network CIDR variables into `network_cidrs` object variable
+
 ## [0.13.1] - 2026-07-26
 ### Added
 - `examples/databricks` for a basic Databricks Secret Scope setup to allow you to connect from your Databricks environment to PostgreSQL Flex
